@@ -74,3 +74,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# FreeFileSync DB files
+*.sync.ffs_db

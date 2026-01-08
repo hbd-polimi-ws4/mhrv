@@ -223,8 +223,32 @@ for curr_win_idx = window_index_offset : window_max_index
         [hrv_fd, ~, ~,  pd_freq ] = hrv_freq(nni_window);
 
         % Non linear metrics
+        % PierMOD: Added check on total ECG duration as too short RR series
+        % causes mhrv.hrv.hrv_nonlinear to throw errors due to impossible sample
+        % entropy calculation. Thus, if the ECG signal lasts for less than
+        % 60 seconds, this part of the script returns a table of NaNs
+        % values. This is perfectly fine, given that less than 6o seconds
+        % are certainly not enough for calculating any non-linear metrics
+        % robustly.
         fprintf('[%.3f] >> mhrv: [%d/%d] Calculating nonlinear metrics...\n', cputime-t0, curr_win_idx+1, num_win);
-        [hrv_nl, pd_nl] = hrv_nonlinear(nni_window);
+        if header_info.total_seconds >= 60
+            % Calculate Non-linear features
+            [hrv_nl, pd_nl] = hrv_nonlinear(nni_window);
+        else
+            % Return a table with NaN values, coherent with the structure
+            % of the one returned by the mhrv.hrv.hrv_nonlinear function
+            fprintf('[%.3f] >> mhrv: [%d/%d] WARNING Nonlinear metrics could not be computed: too short RRI series. Returning NaNs.\n', cputime-t0, curr_win_idx+1, num_win);
+            % Data
+            hrv_nl = table; hrv_nl.Properties.Description = 'Nonlinear HRV Metrics';
+            hrv_nl.SD1 = NaN; hrv_nl.Properties.VariableUnits{'SD1'} = 'ms'; hrv_nl.Properties.VariableDescriptions{'SD1'} = 'NN interval standard deviation along the perpendicular to the line-of-identity';
+            hrv_nl.SD2 = NaN; hrv_nl.Properties.VariableUnits{'SD2'} = 'ms'; hrv_nl.Properties.VariableDescriptions{'SD2'} = 'NN interval standard deviation along the line-of-identity';
+            hrv_nl.alpha1 = NaN; hrv_nl.Properties.VariableUnits{'alpha1'} = 'n.u.'; hrv_nl.Properties.VariableDescriptions{'alpha1'} = 'DFA low-scale slope';
+            hrv_nl.alpha2 = NaN; hrv_nl.Properties.VariableUnits{'alpha2'} = 'n.u.'; hrv_nl.Properties.VariableDescriptions{'alpha2'} = 'DFA high-scale slope';
+            hrv_nl.SampEn = NaN; hrv_nl.Properties.VariableUnits{'SampEn'} = 'n.u.'; hrv_nl.Properties.VariableDescriptions{'SampEn'} = 'Sample entropy';
+            % Plot data (here, I just return empty structs, given that plotting
+            % the data is not of our interest, in general)
+            pd_nl.name = 'Nonlinear HRV'; pd_nl.poincare = struct(); pd_nl.dfa = struct(); pd_nl.mse = struct();
+        end
 
         % Heart rate fragmentation metrics
         fprintf('[%.3f] >> mhrv: [%d/%d] Calculating fragmentation metrics...\n', cputime-t0, curr_win_idx+1, num_win);

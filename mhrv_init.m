@@ -110,7 +110,14 @@ ver_cmp_ = mhrv.util.vercmp(wfdb_version_, supported_version_);
 if ver_cmp_ < 0
     warning('Detected WFDB version (%s) is older than the tested version, please use %s or newer', wfdb_version_, supported_version_);
 elseif ver_cmp_ > 0
-    disp('Notice: Detected WFDB version (%s) is newer than the tested version (%s)', wfdb_version_, supported_version_);
+    % PierMOD: Corrected wrong usage of Matlab's "disp" function
+    % (generating an error during toolbox initialization) by replacing it
+    % with "fprintf"
+    %---Original (physiozoo/mhrv)
+    % disp('Notice: Detected WFDB version (%s) is newer than the tested version (%s)', wfdb_version_, supported_version_);
+    %---Modified
+    fprintf('\nNotice: Detected WFDB version (%s) is newer than the tested version (%s)\n\n', wfdb_version_, supported_version_);
+    %---
 end
 
 end

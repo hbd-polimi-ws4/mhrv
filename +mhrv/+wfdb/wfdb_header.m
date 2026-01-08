@@ -68,7 +68,25 @@ while true
         first_line = false;
 
         N_channels = str2double(split_line{2});
-        Fs = str2double(split_line{3});
+        % PierMOD: For the T-Wave Alternans Database, .hea files have a
+        % sampling frequency specified as "500/250"... Although, this is
+        % not the standard way expected in Physionet datasets, I suspect
+        % it might indicate that the original sampling frequency was 250Hz
+        % but the signal was resampled to 500Hz. In fact, the official WFDB
+        % Matlab reader (rdsamp.m) just interprets it as 500 Hz, which is
+        % the expected sampling frequency also reported in the official
+        % homepage of that database. Thus, I applied the following
+        % workaround here and issue a warning in case this happens.
+        %---Original (physiozoo/mhrv)
+        % Fs = str2double(split_line{3});
+        %---Modified
+        Fs_str = split_line{3};
+        Fs = str2double(Fs_str);
+        if isnan(Fs)
+            Fs = str2double( strtok(Fs_str,'/') );
+            warning('wfdb_header:nonstandardFsString','The .hea file reports a sampling freq formatted in a non-standard way: "%s" \n Assuming: %d Hz',Fs_str,Fs);
+        end
+        %---
         N_samples  = str2double(split_line{4});
         channel_info = cell(1, N_channels);
         continue;

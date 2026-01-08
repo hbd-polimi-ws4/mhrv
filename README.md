@@ -7,6 +7,19 @@ Status](https://readthedocs.org/projects/mhrv/badge/?version=latest)](https://mh
 from both ECG signals and RR-interval time series. The toolbox works with ECG
 data in the [PhysioNet](https://physionet.org/) [1] WFDB data format.
 
+## Disclaimer
+
+This is a forked version of the original repository [physiozoo/mhrv](https://github.com/physiozoo/mhrv). All credit goes to the authors of the original project.
+
+In this fork, I just fixed some issues and made the tool more flexible for the needs of the Health Big Data project. To facilitate the identification of my changes in the code, simply look for comments starting with the string "PierMOD". In the following, a summary of the main changes I made with respect to the original GitHub repository:
+
+* Modified file: +mhrv/+wfdb/+wfdb_header.m
+  Edits: Small fixes
+* Modified file: mhrv_init.m
+  Edits: Small fixes
+* Modified file: +mhrv/mhrv.m
+  Edits: Added a check on total ECG duration before computing non-linear HRV indices, as too short RR series cause function mhrv.hrv.hrv_nonlinear to throw an error due to impossible sample entropy calculation. 
+
 ## Features
 
 - **WFDB wrappers and helpers**. A small subset of the PhysioNet WFDB tools are
